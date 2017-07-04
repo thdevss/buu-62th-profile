@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Create BUU 62th Picture from Facebook Profile Picture</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="stylesheet" href="https://bootswatch.com/darkly/bootstrap.css" media="screen">
+    <link rel="stylesheet" href="https://bootswatch.com/assets/css/custom.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <style>
+    .changeFrame, .memberBar a, .loginBtn a {
+        cursor: pointer;
+    }
+    </style>
+      </head>
+  <body>
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#" data-toggle="modal" data-target="#about">BUU 62th Profile Picture</a>
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div class="navbar-collapse collapse" id="navbar-main">
+
+          <ul class="nav navbar-nav navbar-right menuLink">
+            <li class="memberBar"><a>Hello : <span id="user_fullname"></span></a></li>
+            <li class="memberBar"><a onclick="logoutFB()">Logout</a></li>
+            <li class="loginBtn"><a onclick="loginFB()">Login</a></li>
+          </ul>
+
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container">
+
+      <div class="bs-docs-section">
+        <div id="isLogin" style="display:none;">
+            <div class="row">
+            <div class="col-lg-6">
+                <div class="bs-component">
+                
+
+                <div class="panel panel-warning">
+                    <div class="panel-heading">
+                    <h3 class="panel-title">Picture</h3>
+                    </div>
+                    <div class="panel-body text-center">
+
+                        <canvas width="400" height="400" id="canvas"></canvas>
+                        <br>
+                        <a href="#" id="download" onclick="getProfileImg();" class="btn btn-large btn-success" crossOrigin="Anonymous">Download Picture Profile</a>
+
+                    </div>
+                </div>
+
+
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <div class="bs-component">
+
+
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                    <h3 class="panel-title"><i class="fa fa-user-circle" aria-hidden="true"></i>  Select Frame</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <a class="changeFrame disabled" data-url="img/frame-0.png"><img src="img/frame-0.png" class="img-responsive"></a>
+                            </div>
+                            <div class="col-xs-4">
+                                <a class="changeFrame disabled" data-url="img/frame-1.png"><img src="img/frame-1.png" class="img-responsive"></a>
+                            </div>
+                            <div class="col-xs-4">
+                                <a class="changeFrame disabled" data-url="img/frame-2.png"><img src="img/frame-2.png" class="img-responsive"></a>
+                            </div>
+                        </div>
+                    
+                    
+                    </div>
+                </div>
+
+                <!-- <div class="fb-like" data-href="http://localhost:8000/fbjs.html" data-layout="standard" data-action="like" data-size="large" data-show-faces="true" data-share="true"></div> -->
+                </div>
+
+
+            </div>
+
+     
+
+
+            </div>
+
+
+        </div>
+      </div>
+
+    </div>
+
+
+    
+</html>
+
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+
+
+        function checkLoginState() {
+            FB.getLoginStatus(function(response) {
+            statusChangeCallback(response);
+            });
+        }
+
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId      : '1463406297035195',
+                cookie     : true,  // enable cookies to allow the server to access 
+                                    // the session
+                xfbml      : true,  // parse social plugins on this page
+                version    : 'v2.7' // use version 2.2
+            });
+
+            FB.getLoginStatus(function(response) {
+                statusChangeCallback(response);
+            });
+
+        };
+
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    
+        function statusChangeCallback(response) {
+            if (response.status === 'connected') {
+                $('.loginBtn').hide();
+                $('.memberBar').show();
+                $("#isLogin").show();
+                getInfo();
+            } else {
+                $('.loginBtn').show();
+                $('.memberBar').hide();
+            }
+        } 
+
+
+
+var frame, picture;
+//login fb
+
+        function getInfo() {
+            FB.api('/me', 'GET', {fields: 'name,email,id,picture.width(400).height(400)'}, function(response) {
+                     
+                //here
+                frame = 'img/frame-0.png'; //default frame
+                jQuery(".changeFrame").removeClass('disabled');
+                jQuery("#user_fullname").html(response.name);
+                toDataURL(response.picture.data.url, function(dataUrl) {
+                    // var picture = loadImage(dataUrl, createProfileImage);
+                    // var frame = loadImage(frame, createProfileImage);
+                    picture = dataUrl;
+                    generateImg(picture, frame);
+                })
+                
+
+
+                // $('#user_img').attr('src', response.picture.data.url);
+            });
+        }
+
+
+
+
+        function loginFB() 
+        {
+            FB.login(function(response) {
+                    statusChangeCallback(response);
+                }, {scope: 'public_profile,email,user_friends,user_work_history,user_education_history'
+            });
+        }
+
+ 
+$( ".changeFrame" ).click(function() {
+    frame = jQuery(this).data('url');
+    // alert(frame);
+
+    generateImg(picture, frame);
+});
+
+
+
+
+function toDataURL(url, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function() {
+    var reader = new FileReader();
+    reader.onloadend = function() {
+      callback(reader.result);
+    }
+    reader.readAsDataURL(xhr.response);
+  };
+  xhr.open('GET', url);
+  xhr.responseType = 'blob';
+  xhr.send();
+}
+
+
+//change frame
+
+
+//picture zone
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var imagesLoaded = 0;
+var img1, img2;
+function generateImg(picture, frame) {
+    imagesLoaded = 0;
+
+    img1 = loadImage(frame, createProfileImage);
+    img2 = loadImage(picture, createProfileImage);
+    
+}
+
+function createProfileImage() {
+    imagesLoaded += 1;
+
+    if(imagesLoaded == 2) {
+
+        // composite now
+        // ctx.globalAlpha = 0.8;
+        // ctx.drawImage(img2, 0, 0);
+        ctx.drawImage(img2, 0, 0, img2.width,    img2.height,     // source rectangle
+                           0, 0, canvas.width, canvas.height); // destination rectangle
+
+        // ctx.globalAlpha = 1;
+        ctx.drawImage(img1, 0, 0);
+        canvas.setAttribute('crossorigin', 'anonymous')
+
+    }
+}
+
+function loadImage(src, onload) {
+    // http://www.thefutureoftheweb.com/blog/image-onload-isnt-being-called
+    var img = new Image();
+
+    img.onload = onload;
+    img.src = src;
+
+    return img;
+}
+
+function getProfileImg(){
+    var download = document.getElementById("download");
+    var image = document.getElementById("canvas").toDataURL("image/png");
+    download.setAttribute("href", image);
+    download.setAttribute("download", "buu-62th.png");
+
+}
+</script>
+
+<div id="about" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Create BUU 62th Picture from Facebook Profile Picture</h4>
+      </div>
+      <div class="modal-body">
+        <p>Created By Dev'ss</p>
+        <p><strong>Idea and Frame Picture By buu.ac.th</strong>, <a href="http://www.buu.ac.th/pic_profile/">http://www.buu.ac.th/pic_profile/</a></p>
+        <br><br>
+        <p>Last Update : 2017/07/04 10:21</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
